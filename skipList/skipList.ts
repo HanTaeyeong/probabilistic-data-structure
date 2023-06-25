@@ -22,31 +22,22 @@ class SkipListNode<T> {
 export class SkipList<T> {
   private heads: SkipListNode<T>[];
   private tails: SkipListNode<T>[];
-  private MAX_VALUE = 9999999;
-
+  private MAX_VALUE;
+  private MIN_VALUE;
   private MAXIMUM_LEVEL_LIMIT = 10; // if maxLength of list = n, around log(n)
-  private maxLevel;
   private size: number;
 
-  private _bindHorizontally(nodes: SkipListNode<T>[]) {
-    for (let i = 0; i < nodes.length; i++) {
-      if (i > 0) {
-        nodes[i].down = nodes[i - 1];
-      }
-      if (i + 1 < nodes.length) {
-        nodes[i].up = nodes[i + 1];
-      }
-    }
-  }
+  constructor(MIN_VALUE: T, MAX_VALUE: T) {
+    this.MAX_VALUE = MAX_VALUE;
+    this.MIN_VALUE = MIN_VALUE;
 
-  constructor() {
     this.size = 0;
 
     const heads = [];
     const tails = [];
 
     for (let i = 0; i < this.MAXIMUM_LEVEL_LIMIT; i++) {
-      const head = new SkipListNode<number>(-this.MAX_VALUE, i, this.MAXIMUM_LEVEL_LIMIT);
+      const head = new SkipListNode<number>(this.MIN_VALUE, i, this.MAXIMUM_LEVEL_LIMIT);
       const tail = new SkipListNode<number>(this.MAX_VALUE, i, this.MAXIMUM_LEVEL_LIMIT);
       head.next = tail;
       tail.prev = head;
@@ -59,6 +50,17 @@ export class SkipList<T> {
 
     this.heads = heads;
     this.tails = tails;
+  }
+
+  private _bindHorizontally(nodes: SkipListNode<T>[]) {
+    for (let i = 0; i < nodes.length; i++) {
+      if (i > 0) {
+        nodes[i].down = nodes[i - 1];
+      }
+      if (i + 1 < nodes.length) {
+        nodes[i].up = nodes[i + 1];
+      }
+    }
   }
 
   private randomLevel(): number {
@@ -234,7 +236,8 @@ export class SkipList<T> {
 }
 
 const test = () => {
-  const skipList = new SkipList();
+  const valueLimit = 999999;
+  const skipList = new SkipList<number>(-valueLimit, valueLimit);
 
   const randomNumbers = [];
 
