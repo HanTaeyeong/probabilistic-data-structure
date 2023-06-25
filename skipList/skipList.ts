@@ -26,10 +26,23 @@ export class SkipList<T> {
   private MIN_VALUE;
   private MAXIMUM_LEVEL_LIMIT = 10; // if maxLength of list = n, around log(n)
   private size: number;
+  private compareFunction: (a: T, b: T) => number = function (a: T, b: T) {
+    if (a > b) {
+      return 1;
+    }
 
-  constructor(MIN_VALUE: T, MAX_VALUE: T) {
+    if (a < b) {
+      return -1;
+    }
+
+    return 0;
+  }; // same rule with https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+
+  constructor(MIN_VALUE: T, MAX_VALUE: T, compareFunction?: (a: T, b: T) => number) {
     this.MAX_VALUE = MAX_VALUE;
     this.MIN_VALUE = MIN_VALUE;
+
+    this.compareFunction = compareFunction;
 
     this.size = 0;
 
@@ -85,7 +98,7 @@ export class SkipList<T> {
     let current = this.heads[level];
 
     while (level >= 0) {
-      while (value > current.next.value) {
+      while (this.compareFunction(current.next.value, value) < 0) {
         current = current.next;
       }
 
@@ -105,7 +118,7 @@ export class SkipList<T> {
     let currentLevel = this.MAXIMUM_LEVEL_LIMIT - 1;
 
     while (currentLevel > 0) {
-      while (current?.next?.value <= value) {
+      while (this.compareFunction(current.next.value, value) <= 0) {
         current = current.next;
       }
 
@@ -125,7 +138,7 @@ export class SkipList<T> {
       current = current.down;
     }
 
-    while (current?.next?.value <= value) {
+    while (this.compareFunction(current.next.value, value) <= 0) {
       current = current.next;
     }
 
@@ -237,7 +250,19 @@ export class SkipList<T> {
 
 const test = () => {
   const valueLimit = 999999;
-  const skipList = new SkipList<number>(-valueLimit, valueLimit);
+  const compareFunction = (a: number, b: number) => {
+    if (a > b) {
+      return 1;
+    }
+
+    if (a < b) {
+      return -1;
+    }
+
+    return 0;
+  };
+
+  const skipList = new SkipList<number>(-valueLimit, valueLimit, compareFunction);
 
   const randomNumbers = [];
 

@@ -14,10 +14,20 @@ var SkipListNode = /** @class */ (function () {
     return SkipListNode;
 }());
 var SkipList = /** @class */ (function () {
-    function SkipList(MIN_VALUE, MAX_VALUE) {
+    function SkipList(MIN_VALUE, MAX_VALUE, compareFunction) {
         this.MAXIMUM_LEVEL_LIMIT = 10; // if maxLength of list = n, around log(n)
+        this.compareFunction = function (a, b) {
+            if (a > b) {
+                return 1;
+            }
+            if (a < b) {
+                return -1;
+            }
+            return 0;
+        }; // is left one is smaller?
         this.MAX_VALUE = MAX_VALUE;
         this.MIN_VALUE = MIN_VALUE;
+        this.compareFunction = compareFunction;
         this.size = 0;
         var heads = [];
         var tails = [];
@@ -61,7 +71,7 @@ var SkipList = /** @class */ (function () {
         var level = randomLevel - 1;
         var current = this.heads[level];
         while (level >= 0) {
-            while (value > current.next.value) {
+            while (this.compareFunction(current.next.value, value) < 0) {
                 current = current.next;
             }
             nodes[level].prev = current;
@@ -73,11 +83,10 @@ var SkipList = /** @class */ (function () {
         }
     };
     SkipList.prototype.search = function (value) {
-        var _a, _b;
         var current = this.heads[this.MAXIMUM_LEVEL_LIMIT - 1];
         var currentLevel = this.MAXIMUM_LEVEL_LIMIT - 1;
         while (currentLevel > 0) {
-            while (((_a = current === null || current === void 0 ? void 0 : current.next) === null || _a === void 0 ? void 0 : _a.value) <= value) {
+            while (this.compareFunction(current.next.value, value) <= 0) {
                 current = current.next;
             }
             if ((current === null || current === void 0 ? void 0 : current.value) === value) {
@@ -94,7 +103,7 @@ var SkipList = /** @class */ (function () {
         while (current === null || current === void 0 ? void 0 : current.down) {
             current = current.down;
         }
-        while (((_b = current === null || current === void 0 ? void 0 : current.next) === null || _b === void 0 ? void 0 : _b.value) <= value) {
+        while (this.compareFunction(current.next.value, value) <= 0) {
             current = current.next;
         }
         if ((current === null || current === void 0 ? void 0 : current.value) === value) {
@@ -183,7 +192,16 @@ var SkipList = /** @class */ (function () {
 exports.SkipList = SkipList;
 var test = function () {
     var valueLimit = 999999;
-    var skipList = new SkipList(-valueLimit, valueLimit);
+    var compareFunction = function (a, b) {
+        if (a > b) {
+            return 1;
+        }
+        if (a < b) {
+            return -1;
+        }
+        return 0;
+    };
+    var skipList = new SkipList(-valueLimit, valueLimit, compareFunction);
     var randomNumbers = [];
     for (var i_1 = 0; i_1 < 10; i_1++) {
         randomNumbers.push((Math.random() * 100) | 0);
